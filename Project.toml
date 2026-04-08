@@ -2,6 +2,9 @@ name = "OfflineHPC"
 uuid = "809b7c03-8e55-4bb2-ba23-714ce97031b6"
 version = "0.1.0"
 
+[deps]
+Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
+
 [compat]
 julia = "1.6"
 
