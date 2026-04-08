@@ -6,13 +6,14 @@
 
 module OfflineHPCClient
 
-using Sockets: IPv4
+import Sockets
 
 const PROXY_KEYS = ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"]
 const PKG_KEYS = ["JULIA_PKG_USE_CLI_GIT", "JULIA_PKG_SERVER"]
 const ALL_KEYS = vcat(PROXY_KEYS, PKG_KEYS)
 
 const _original_env = Dict{String,Union{String,Nothing}}()
+const _git_proxy_was_set = Ref(false)
 
 function connect(; port::Int=8080, check::Bool=true)
     proxy = "http://localhost:$(port)"
@@ -24,6 +25,14 @@ function connect(; port::Int=8080, check::Bool=true)
     end
     ENV["JULIA_PKG_USE_CLI_GIT"] = "true"
     ENV["JULIA_PKG_SERVER"] = ""
+    # Configure git to use the proxy
+    try
+        run(`git config --global http.proxy $proxy`)
+        run(`git config --global https.proxy $proxy`)
+        _git_proxy_was_set[] = true
+    catch
+        println("[OfflineHPC] Warning: could not set git proxy config")
+    end
     println("[OfflineHPC] Proxy configured → localhost:$(port)")
     if check
         if _check_tunnel(port)
@@ -45,6 +54,14 @@ function disconnect()
         end
     end
     empty!(_original_env)
+    # Remove git proxy config
+    if _git_proxy_was_set[]
+        try
+            run(`git config --global --unset http.proxy`)
+            run(`git config --global --unset https.proxy`)
+            _git_proxy_was_set[] = false
+        catch; end
+    end
     println("[OfflineHPC] Proxy disconnected")
     return nothing
 end
@@ -58,7 +75,7 @@ end
 
 function _check_tunnel(port::Int)
     try
-        sock = Sockets.connect(IPv4("127.0.0.1"), port)
+        sock = Sockets.connect(Sockets.IPv4("127.0.0.1"), port)
         close(sock)
         return true
     catch
