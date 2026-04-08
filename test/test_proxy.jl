@@ -119,3 +119,46 @@ end
         close(upstream)
     end
 end
+
+@testset "CONNECT tunnel reverses data" begin
+    # Mock server that reverses whatever it receives
+    mock = listen(IPv4("127.0.0.1"), 0)
+    mock_port = Int(getsockname(mock)[2])
+
+    @async begin
+        try
+            sock = accept(mock)
+            data = String(readavailable(sock))
+            write(sock, reverse(data))
+            flush(sock)
+            sleep(0.2)
+            close(sock)
+        catch e
+            e isa Base.IOError || rethrow(e)
+        end
+    end
+
+    proxy_state = start_proxy(port=0)
+    proxy_port = proxy_state.port
+
+    try
+        client = Sockets.connect(IPv4("127.0.0.1"), proxy_port)
+        write(client, "CONNECT 127.0.0.1:$(mock_port) HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n")
+        flush(client)
+        sleep(0.5)
+
+        response = String(readavailable(client))
+        @test contains(response, "200")
+
+        write(client, "test data")
+        flush(client)
+        sleep(0.5)
+        reply = String(readavailable(client))
+        @test contains(reply, "atad tset")
+
+        close(client)
+    finally
+        stop_proxy(proxy_state)
+        close(mock)
+    end
+end
