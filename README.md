@@ -1,8 +1,19 @@
-# OfflineHPC.jl
+<p align="center">
+  <img src="docs/logo.svg" width="480" alt="OfflineHPC.jl">
+</p>
 
-Install Julia packages on air-gapped HPC systems through an SSH reverse tunnel proxy.
+<h1 align="center">OfflineHPC.jl</h1>
 
-Zero external dependencies — uses only Julia stdlib.
+<p align="center">
+  <em>Install Julia packages on air-gapped HPC systems through an SSH reverse tunnel proxy.</em>
+  <br/>
+  Zero external dependencies — uses only Julia stdlib.
+</p>
+
+<p align="center">
+  <a href="https://github.com/XingyuZhang2018/OfflineHPC.jl/actions/workflows/CI.yml"><img src="https://github.com/XingyuZhang2018/OfflineHPC.jl/actions/workflows/CI.yml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/XingyuZhang2018/OfflineHPC.jl"><img src="https://codecov.io/gh/XingyuZhang2018/OfflineHPC.jl/branch/main/graph/badge.svg" alt="Coverage"></a>
+</p>
 
 ## Quick Start
 
