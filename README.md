@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/XingyuZhang2018/OfflineHPC.jl/actions/workflows/CI.yml"><img src="https://github.com/XingyuZhang2018/OfflineHPC.jl/actions/workflows/CI.yml/badge.svg" alt="CI"></a>
-  <a href="https://codecov.io/gh/XingyuZhang2018/OfflineHPC.jl"><img src="https://codecov.io/gh/XingyuZhang2018/OfflineHPC.jl/branch/main/graph/badge.svg" alt="Coverage"></a>
+  <a href="https://codecov.io/gh/XingyuZhang2018/OfflineHPC.jl"><img src="https://codecov.io/gh/XingyuZhang2018/OfflineHPC.jl/branch/master/graph/badge.svg" alt="Coverage"></a>
 </p>
 
 ## Quick Start
