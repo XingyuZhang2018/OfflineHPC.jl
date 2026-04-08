@@ -44,7 +44,9 @@ end
 Parse an absolute HTTP URL into host, port (default 80), and path (default "/").
 """
 function parse_target_url(url::AbstractString)
-    # Strip the "http://" prefix
+    # Determine default port from scheme
+    default_port = startswith(url, "https://") ? 443 : 80
+    # Strip the scheme prefix
     rest = replace(url, r"^https?://" => "")
     # Split host+port from path
     slash = findfirst('/', rest)
@@ -59,7 +61,7 @@ function parse_target_url(url::AbstractString)
     colon = findfirst(':', hostport)
     if colon === nothing
         host = hostport
-        port = 80
+        port = default_port
     else
         host = hostport[1:colon-1]
         port = parse(Int, hostport[colon+1:end])
@@ -162,7 +164,8 @@ function handle_http(client::IO, method::String, url::String, version::String, h
         # Relay the full response back to the client
         relay!(upstream, client)
     catch e
-        e isa Base.IOError || e isa EOFError || begin
+        if !(e isa Base.IOError || e isa EOFError)
+            @warn "handle_http error" exception=(e, catch_backtrace())
             try
                 write(client, "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n")
             catch
@@ -188,7 +191,8 @@ function handle_connect(client::IO, target::String, version::String, headers::Di
         flush(client)
         relay!(upstream, client)
     catch e
-        e isa Base.IOError || e isa EOFError || begin
+        if !(e isa Base.IOError || e isa EOFError)
+            @warn "handle_connect error" exception=(e, catch_backtrace())
             try
                 write(client, "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n")
             catch

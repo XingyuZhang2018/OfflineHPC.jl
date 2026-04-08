@@ -23,6 +23,11 @@ end
     @test parse_target_url("http://example.com") == ("example.com", 80, "/")
 end
 
+@testset "parse_target_url https default port" begin
+    @test parse_target_url("https://example.com/path")[2] == 443
+    @test parse_target_url("https://example.com:8443/path")[2] == 8443
+end
+
 @testset "parse CONNECT target" begin
     @test parse_connect_target("example.com:443") == ("example.com", 443)
     @test parse_connect_target("github.com:22") == ("github.com", 22)
