@@ -2,6 +2,12 @@
 
 using Sockets
 
+const VERBOSE = Ref(false)
+
+function set_verbose(v::Bool)
+    VERBOSE[] = v
+end
+
 # ---------------------------------------------------------------------------
 # Parsing helpers
 # ---------------------------------------------------------------------------
@@ -149,6 +155,7 @@ Forward a plain HTTP request (non-CONNECT) to the upstream server and relay
 the response back to the client.
 """
 function handle_http(client::IO, method::String, url::String, version::String, headers::Dict{String,String})
+    VERBOSE[] && println("[proxy] $method $url")
     host, port, path = parse_target_url(url)
     upstream = nothing
     try
@@ -183,6 +190,7 @@ Handle an HTTP CONNECT request: establish a TCP connection to the target,
 send "200 Connection Established", then relay bidirectionally.
 """
 function handle_connect(client::IO, target::String, version::String, headers::Dict{String,String})
+    VERBOSE[] && println("[proxy] CONNECT → $target")
     host, port = parse_connect_target(target)
     upstream = nothing
     try
@@ -212,6 +220,7 @@ Returns a `ProxyState` that can be passed to `stop_proxy`.
 function start_proxy(; port::Int=8080)
     server = Sockets.listen(IPv4("127.0.0.1"), port)
     actual_port = Int(getsockname(server)[2])
+    println("[proxy] Listening on port $(actual_port)")
     running = Threads.Atomic{Bool}(true)
 
     task = @async begin

@@ -1,6 +1,6 @@
 module OfflineHPC
 
-export serve, stop
+export serve, stop, set_verbose
 
 include("proxy.jl")
 include("tunnel.jl")
